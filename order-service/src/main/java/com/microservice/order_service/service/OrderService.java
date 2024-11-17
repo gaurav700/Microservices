@@ -7,9 +7,13 @@ import com.microservice.order_service.entity.OrderEntity;
 import com.microservice.order_service.entity.OrderItemEntity;
 import com.microservice.order_service.entity.OrderStatus;
 import com.microservice.order_service.repository.OrderRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,8 +44,11 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException(String.format("order not found with ID : %d", id)));
     }
 
-
+//    @Retry(name="inventoryRetry", fallbackMethod = "createOrderFallback")
+//    @RateLimiter(name="inventoryRateLimiter", fallbackMethod = "createOrderFallback")
+//    @CircuitBreaker(name="inventoryCircuitBreaker", fallbackMethod = "createOrderFallback")
     public OrderRequestDTO createOrder(OrderRequestDTO orderRequestDTO) {
+
         Double totalPrice = inventoryClient.reduceStocks(orderRequestDTO);
         OrderEntity orderEntity = modelMapper.map(orderRequestDTO, OrderEntity.class);
         for(OrderItemEntity orderItemEntity : orderEntity.getItems()){
@@ -53,4 +60,12 @@ public class OrderService {
 
         return modelMapper.map(order, OrderRequestDTO.class);
     }
+
+    public OrderRequestDTO createOrderFallback(OrderRequestDTO orderRequestDTO, Throwable throwable){
+        log.error("Fallback occurred due to : {}", throwable.getMessage());
+        return new OrderRequestDTO();
+    }
+
+
+
 }

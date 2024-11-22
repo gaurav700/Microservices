@@ -6,6 +6,7 @@ import com.microservice.order_service.dto.OrderRequestItemDTO;
 import com.microservice.order_service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
+@RefreshScope
 @RequestMapping("/core")
 public class OrderController {
     private final OrderService orderService;

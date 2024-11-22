@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: config-server
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/gaurav700/microservices-config-server
+          username: gaurav700
+          password: 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
+          default-label: main
+
+server:
+  port: 8888
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
